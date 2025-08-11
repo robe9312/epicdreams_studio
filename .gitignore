@@ -1,8 +1,32 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-env/
+*.py[cod]
+*$py.class
+
+# Environment (ajusta el nombre si usas otro)
 venv/
+env/
+ENV/
+
+# Database
 db.sqlite3
+
+# Django stuff:
 *.log
-.env
-*.sqlite3
+*.pot
+*.pyc
+*.pyo
+
+# Media files
+media/
+
+# Static files (si generas)
+staticfiles/
+
+# IDEs
+.vscode/
+.idea/
+
+# Mac
+.DS_Store
+
