@@ -1,0 +1,31 @@
+{% extends 'base.html' %}  <!-- Debe ser la primera línea -->
+
+{% block title %}Inicio - Epic Dreams Studio{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5 pt-5">
+  <h1>Bienvenido a Epic Dreams Studio</h1>
+  <p class="lead">Interactúa con el asistente para comenzar</p>
+
+  <div class="glass-card p-4 mt-5 mx-auto" style="max-width: 600px;">
+    <h3><i class="bi bi-robot"></i> Cómo navegar</h3>
+    <p class="mt-3">
+      1. Haz clic en el ícono del asistente en la esquina inferior derecha<br>
+      2. Selecciona un destino en el menú de navegación<br>
+      3. ¡Explora nuestra plataforma!
+    </p>
+
+    <div class="mt-4">
+      <button id="open-assistant" class="btn btn-primary">
+        <i class="bi bi-robot"></i> Abrir Asistente
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('open-assistant').addEventListener('click', function() {
+    document.getElementById('asistente-flotante').click();
+  });
+</script>
+{% endblock %}  <!-- Cierre del bloque content -->

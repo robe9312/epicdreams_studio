@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tienda - Epic Dreams Studio{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1>Nuestra Tienda</h1>
+
+  <div class="row mt-4">
+    <div class="col-md-4 mb-4">
+      <div class="glass-card p-4 h-100 text-center">
+        <img src="{% static 'img/tienda/camara.jpg' %}" alt="Cámara" class="img-fluid mb-3">
+        <h3>Cámaras Profesionales</h3>
+        <p>Equipamiento de alta calidad para filmación.</p>
+        <button class="btn btn-primary mt-2">Comprar</button>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="glass-card p-4 h-100 text-center">
+        <img src="{% static 'img/tienda/microfono.jpg' %}" alt="Micrófono" class="img-fluid mb-3">
+        <h3>Equipo de Audio</h3>
+        <p>Micrófonos y grabadoras de alta fidelidad.</p>
+        <button class="btn btn-primary mt-2">Comprar</button>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="glass-card p-4 h-100 text-center">
+        <img src="{% static 'img/tienda/iluminacion.jpg' %}" alt="Iluminación" class="img-fluid mb-3">
+        <h3>Equipo de Iluminación</h3>
+        <p>Kits profesionales para tus producciones.</p>
+        <button class="btn btn-primary mt-2">Comprar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,613 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Epic Dreams Studio{% endblock %}</title>
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #121826, #1a2439);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #page-blur {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 900;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      color: white;
+    }
+
+    #asistente-flotante {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px; height: 70px;
+      z-index: 1000;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      background: linear-gradient(135deg, #2BC4F3, #1a8cff);
+      box-shadow: 0 4px 20px rgba(43, 196, 243, 0.4);
+    }
+
+    #asistente-flotante:hover {
+      transform: translateX(-50%) scale(1.1);
+      box-shadow: 0 0 25px rgba(43, 196, 243, 0.7);
+    }
+
+    /* BARRA DE NAVEGACIÓN SUPERIOR SIN FONDO */
+    #nav-buttons {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      z-index: 1100;
+      display: flex;
+      gap: 15px;
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      padding: 10px 20px;
+      border-radius: 50px;
+      justify-content: center;
+      align-items: center;
+      background: rgba(30, 40, 60, 0.7);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(100, 150, 255, 0.2);
+    }
+
+    #nav-buttons a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      padding: 8px;
+      min-width: 70px;
+      border-radius: 12px;
+      background: transparent;
+    }
+
+    #nav-buttons a:hover {
+      color: #a3daff;
+      transform: translateY(-3px);
+      background: rgba(100, 150, 255, 0.15);
+      text-shadow: 0 0 8px rgba(163, 218, 255, 0.6);
+    }
+
+    #nav-buttons a i {
+      font-size: 1.4rem;
+      margin-bottom: 5px;
+      transition: all 0.3s ease;
+    }
+
+    #nav-buttons a span {
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    #chat-input-bar {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%; max-width: 500px;
+      z-index: 1200;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Mensajes del asistente centrados */
+    #chat-float-response {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 90%;
+      max-height: 200px;
+      overflow-y: auto;
+      color: #aaddff;
+      font-size: 1.3rem;
+      font-weight: 500;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+      z-index: 1150;
+      pointer-events: none;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    /* Mensajes del usuario en esquina inferior derecha */
+    #user-messages {
+      position: fixed;
+      bottom: 110px;
+      right: 20px;
+      max-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 1150;
+      pointer-events: none;
+      user-select: none;
+      align-items: flex-end;
+    }
+
+    .user-msg {
+      background: rgba(40, 80, 120, 0.7);
+      color: #a3daff;
+      padding: 8px 14px;
+      border-radius: 15px 15px 0 15px;
+      font-size: 0.95rem;
+      max-width: 100%;
+      word-wrap: break-word;
+      pointer-events: auto;
+      user-select: text;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.5s ease forwards;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+    }
+
+    /* Botones de sugerencia */
+    #suggestion-buttons {
+      position: fixed;
+      bottom: 160px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      z-index: 1210;
+      pointer-events: auto;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    #suggestion-buttons.show {
+      opacity: 1;
+    }
+
+    #suggestion-buttons button {
+      cursor: pointer;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      border-radius: 20px;
+      border: 1px solid rgba(100, 150, 255, 0.4);
+      background: rgba(30, 40, 60, 0.7);
+      color: #e0f0ff;
+      transition: all 0.3s ease;
+      user-select: none;
+      opacity: 0;
+      animation: fadeInUp 0.5s forwards;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #suggestion-buttons button:nth-child(1) { animation-delay: 0.1s; }
+    #suggestion-buttons button:nth-child(2) { animation-delay: 0.3s; }
+    #suggestion-buttons button:nth-child(3) { animation-delay: 0.5s; }
+
+    #suggestion-buttons button:hover {
+      background: rgba(50, 100, 150, 0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(43, 196, 243, 0.4);
+      color: white;
+    }
+
+    .typing-indicator {
+      font-style: italic;
+      color: #aaa;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      font-size: 1rem;
+      margin: 0;
+      padding: 0;
+      align-self: center;
+    }
+
+    /* Input iridiscente estilo DeepSeek */
+    .iridescent-input {
+      width: 100%;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 15px 0 0 15px;
+      background: rgba(20, 30, 50, 0.7);
+      color: #e0f0ff;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      box-shadow:
+        0 0 0 2px rgba(100, 150, 255, 0.1),
+        0 0 15px rgba(100, 150, 255, 0.1);
+      position: relative;
+      outline: none;
+    }
+
+    .iridescent-input:focus {
+      background: rgba(25, 35, 55, 0.8);
+      box-shadow:
+        0 0 0 2px rgba(100, 150, 255, 0.3),
+        0 0 20px rgba(100, 200, 255, 0.2);
+      animation: iridescent-glow 3s infinite alternate;
+    }
+
+    @keyframes iridescent-glow {
+      0% {
+        box-shadow:
+          0 0 0 2px rgba(100, 150, 255, 0.3),
+          0 0 20px rgba(100, 200, 255, 0.2),
+          0 0 30px rgba(100, 200, 255, 0.1);
+      }
+      25% {
+        box-shadow:
+          0 0 0 2px rgba(100, 200, 255, 0.4),
+          0 0 25px rgba(100, 200, 255, 0.3),
+          0 0 40px rgba(150, 200, 255, 0.2);
+      }
+      50% {
+        box-shadow:
+          0 0 0 2px rgba(150, 200, 255, 0.5),
+          0 0 30px rgba(150, 200, 255, 0.4),
+          0 0 50px rgba(200, 220, 255, 0.3);
+      }
+      75% {
+        box-shadow:
+          0 0 0 2px rgba(200, 220, 255, 0.4),
+          0 0 25px rgba(200, 220, 255, 0.3),
+          0 0 40px rgba(220, 240, 255, 0.2);
+      }
+      100% {
+        box-shadow:
+          0 0 0 2px rgba(100, 150, 255, 0.3),
+          0 0 20px rgba(100, 200, 255, 0.2),
+          0 0 30px rgba(100, 200, 255, 0.1);
+      }
+    }
+
+    /* Botón de enviar mejorado */
+    .gradient-btn {
+      background: linear-gradient(135deg, #2BC4F3, #1a8cff);
+      border: none;
+      border-radius: 0 15px 15px 0;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(43, 196, 243, 0.3);
+    }
+
+    .gradient-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(43, 196, 243, 0.5);
+    }
+
+    /* Animación unificada */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Efecto de aparición sutil para elementos */
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="page-blur"></div>
+
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+
+  <div id="asistente-flotante" class="rounded-circle p-3 d-flex align-items-center justify-content-center" aria-label="Asistente virtual" role="button" tabindex="0">
+    <i class="bi bi-robot fs-3"></i>
+  </div>
+
+  <!-- Barra de navegación superior sin fondo -->
+  <div id="nav-buttons">
+    <a href="{% url 'core:index' %}"><i class="bi bi-house"></i> <span>Inicio</span></a>
+    <a href="{% url 'servicios:index' %}"><i class="bi bi-palette"></i> <span>Servicios</span></a>
+    <a href="{% url 'cursos:index' %}"><i class="bi bi-journal-bookmark"></i> <span>Cursos</span></a>
+    <a href="{% url 'tienda:index' %}"><i class="bi bi-cart"></i> <span>Tienda</span></a>
+    <a href="{% url 'contacto:index' %}"><i class="bi bi-envelope"></i> <span>Contacto</span></a>
+    {% if user.is_authenticated %}
+      <a href="#"><i class="bi bi-person"></i> <span>Perfil</span></a>
+    {% else %}
+      <a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> <span>Entrar</span></a>
+    {% endif %}
+  </div>
+
+  <!-- Mensajes del asistente -->
+  <div id="chat-float-response"></div>
+
+  <!-- Mensajes del usuario -->
+  <div id="user-messages"></div>
+
+  <!-- Botones de sugerencias -->
+  <div id="suggestion-buttons"></div>
+
+  <!-- Entrada de chat -->
+  <div id="chat-input-bar" class="input-group glass-card p-2">
+    <input
+      type="text"
+      id="chat-input"
+      class="form-control iridescent-input"
+      placeholder="Escribe tu mensaje..."
+    >
+    <button id="send-chat" class="btn gradient-btn" aria-label="Enviar mensaje">
+      <i class="bi bi-send"></i>
+    </button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const asistenteBtn = document.getElementById('asistente-flotante');
+      const navButtons = document.getElementById('nav-buttons');
+      const chatInputBar = document.getElementById('chat-input-bar');
+      const chatInput = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-chat');
+      const chatFloatResponse = document.getElementById('chat-float-response');
+      const userMessages = document.getElementById('user-messages');
+      const pageBlur = document.getElementById('page-blur');
+      const suggestionButtonsContainer = document.getElementById('suggestion-buttons');
+
+      let chatActive = sessionStorage.getItem('chatOpen') === 'true';
+      let typingIndicator = null;
+      let isProcessing = false;
+
+      function updateChatState() {
+        if (chatActive) {
+          navButtons.style.display = 'flex';
+          chatInputBar.style.display = 'flex';
+          pageBlur.style.display = 'block';
+
+          // Animación sutil para la barra de navegación
+          setTimeout(() => {
+            navButtons.style.opacity = '1';
+            navButtons.style.transform = 'translateX(-50%) translateY(0)';
+            navButtons.style.transition = 'all 0.7s cubic-bezier(0.23, 1, 0.32, 1)';
+
+            chatInputBar.style.opacity = '1';
+            pageBlur.style.opacity = '1';
+            suggestionButtonsContainer.classList.add('show');
+          }, 10);
+
+          chatInput.focus();
+
+          // Mensaje inicial
+          if (!chatFloatResponse.textContent.trim()) {
+            setTimeout(() => {
+              setAssistantMessage('¡Bienvenido! Soy tu asistente creativo');
+              showSuggestionButtons();
+            }, 500);
+          }
+        } else {
+          // Animación de desvanecimiento sutil
+          navButtons.style.opacity = '0';
+          navButtons.style.transform = 'translateX(-50%) translateY(-30px)';
+          navButtons.style.transition = 'all 1.5s cubic-bezier(0.23, 1, 0.32, 1)';
+
+          chatInputBar.style.opacity = '0';
+          pageBlur.style.opacity = '0';
+          suggestionButtonsContainer.classList.remove('show');
+
+          // Limpiar contenido
+          setTimeout(() => {
+            navButtons.style.display = 'none';
+            chatInputBar.style.display = 'none';
+            pageBlur.style.display = 'none';
+            chatFloatResponse.innerHTML = '';
+            userMessages.innerHTML = '';
+            hideTypingIndicator();
+            removeSuggestionButtons();
+          }, 500);
+        }
+      }
+
+      function toggleAssistant() {
+        if (isProcessing) return;
+        chatActive = !chatActive;
+        sessionStorage.setItem('chatOpen', chatActive);
+        updateChatState();
+      }
+
+      asistenteBtn.addEventListener('click', toggleAssistant);
+      asistenteBtn.addEventListener('keypress', e => {
+        if (e.key === 'Enter' || e.key === ' ') toggleAssistant();
+      });
+
+      function setAssistantMessage(text) {
+        chatFloatResponse.textContent = text;
+        chatFloatResponse.classList.add('fade-in');
+        setTimeout(() => chatFloatResponse.classList.remove('fade-in'), 600);
+      }
+
+      function addUserMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'user-msg';
+        div.textContent = text;
+        userMessages.appendChild(div);
+
+        // Limitar a 3 mensajes
+        if (userMessages.children.length > 3) {
+          // Desvanecer y eliminar el mensaje más antiguo
+          const firstMsg = userMessages.children[0];
+          firstMsg.style.transition = 'opacity 0.5s ease';
+          firstMsg.style.opacity = '0';
+
+          setTimeout(() => {
+            if (userMessages.contains(firstMsg)) {
+              userMessages.removeChild(firstMsg);
+            }
+          }, 500);
+        }
+      }
+
+      function showSuggestionButtons() {
+        suggestionButtonsContainer.innerHTML = '';
+
+        const suggestions = [
+          { label: 'Registro', message: 'Quiero registrarme' },
+          { label: 'Cursos', message: 'Ver cursos disponibles' },
+          { label: 'Crear guion', message: 'Crear un guion personalizado' }
+        ];
+
+        suggestions.forEach((s, index) => {
+          const btn = document.createElement('button');
+          btn.textContent = s.label;
+          btn.className = 'btn btn-sm';
+          btn.style.animationDelay = `${0.1 * index}s`;
+          btn.addEventListener('click', () => {
+            if (isProcessing) return;
+            sendMessage(s.message);
+            removeSuggestionButtons();
+          });
+          suggestionButtonsContainer.appendChild(btn);
+        });
+
+        setTimeout(() => {
+          suggestionButtonsContainer.classList.add('show');
+        }, 50);
+      }
+
+      function removeSuggestionButtons() {
+        suggestionButtonsContainer.classList.remove('show');
+        setTimeout(() => {
+          suggestionButtonsContainer.innerHTML = '';
+        }, 300);
+      }
+
+      function showTypingIndicator() {
+        if (typingIndicator) return;
+        typingIndicator = document.createElement('div');
+        typingIndicator.className = 'typing-indicator';
+        typingIndicator.textContent = 'C.A está escribiendo...';
+        chatFloatResponse.appendChild(typingIndicator);
+      }
+
+      function hideTypingIndicator() {
+        if (typingIndicator) {
+          typingIndicator.remove();
+          typingIndicator = null;
+        }
+      }
+
+      function sendMessage(msg) {
+        if (!msg.trim() || isProcessing) return;
+
+        isProcessing = true;
+        addUserMessage(msg);
+        chatInput.value = '';
+        showTypingIndicator();
+        removeSuggestionButtons();
+
+        const csrfToken = getCookie('csrftoken');
+
+        fetch("{% url 'assistant:chat_api' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({ message: msg })
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Error en el servidor');
+          return response.json();
+        })
+        .then(data => {
+          hideTypingIndicator();
+          setAssistantMessage(data.response || 'No entendí tu mensaje');
+          setTimeout(() => {
+            showSuggestionButtons();
+            isProcessing = false;
+          }, 500);
+        })
+        .catch(error => {
+          hideTypingIndicator();
+          setAssistantMessage('Error: ' + error.message);
+          setTimeout(() => {
+            showSuggestionButtons();
+            isProcessing = false;
+          }, 500);
+        });
+      }
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      sendBtn.addEventListener('click', () => sendMessage(chatInput.value));
+      chatInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') sendMessage(chatInput.value);
+      });
+
+      document.querySelectorAll('#nav-buttons a').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const url = link.getAttribute('href');
+          setAssistantMessage('Redirigiendo...');
+          suggestionButtonsContainer.classList.remove('show');
+          isProcessing = true;
+
+          // Efecto sutil en el botón clickeado
+          link.style.transform = 'scale(0.95)';
+          link.style.transition = 'transform 0.3s ease';
+
+          setTimeout(() => {
+            window.location.href = url;
+          }, 800);
+        });
+      });
+
+      updateChatState();
+    });
+  </script>
+</body>
+</html>

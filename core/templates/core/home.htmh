@@ -1,0 +1,8 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Inicio - Epic Dreams Studio{% endblock %}
+
+{% block content %}
+<h1>Bienvenido a Epic Dreams Studio</h1>
+<p>Tu espacio creativo con asistencia IA.</p>
+{% endblock %}
